@@ -30,6 +30,7 @@ export default class ReflexPlugin extends FlexPlugin {
       .add(<CustomTaskListContainer key="ReflexPlugin-component" />, options);
 
 
+    //BLOCK TRANSFER TO SOME QUEUES
 
     //Global var to store queues object
     let queues = undefined;
@@ -62,7 +63,7 @@ export default class ReflexPlugin extends FlexPlugin {
     });
 
 
-    console.log('ADDING BEFORE TRANSFER TASK listener');
+    
     Actions.addListener('beforeTransferTask', async (payload, abortFunction) => {
       console.log('beforeTransferTaskPayload: ', payload);
       const targetSid = payload.targetSid;
@@ -80,6 +81,31 @@ export default class ReflexPlugin extends FlexPlugin {
         }
       }
     });
+
+
+    //PLAY AUDIO ON INBOUND CALLS
+    const audio = new Audio('https://api.twilio.com/cowbell.mp3');
+    const playAudio = reservation => {
+      audio.play();
+      ['accepted', 'canceled', 'rejected', 'rescinded', 'timeout'].forEach(e => {
+        reservation.on(e, () => audio.pause());
+      });
+    };
+
+    manager.workerClient.on('reservationCreated', reservation => {
+      console.log('reservationCreated: ', reservation);
+      const isVoiceQueue = reservation.task.taskChannelUniqueName === 'voice';
+      const isInboundTask = reservation.task.attributes.direction === 'inbound';
+      if (isVoiceQueue && isInboundTask) {
+        console.log('Task is incoming call');
+        playAudio(reservation);
+      }
+    });
+
+
+
+
+    //end init
   }
 
 

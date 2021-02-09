@@ -2,6 +2,15 @@
 
 Twilio Flex Plugins allow you to customize the appearance and behavior of [Twilio Flex](https://www.twilio.com/flex). If you want to learn more about the capabilities and how to use the API, check out our [Flex documentation](https://www.twilio.com/docs/flex).
 
+The Re-Flex Plugin contains the following additional Flex add-ons:
+
+1) Block certain Transfers (Based on Queue name/keyword)
+
+2) Play Audio notification to agent on incoming call
+
+
+
+
 ## Setup
 
 Make sure you have [Node.js](https://nodejs.org) as well as [`npm`](https://npmjs.com) installed.
