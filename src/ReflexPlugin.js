@@ -41,10 +41,10 @@ export default class ReflexPlugin extends FlexPlugin {
       content: TRANSFER_BLOCKED,
       type: NotificationType.warning,
       timeout: 5000
-    });	
+    });
 
 
-    //BLOCK TRANSFER TO SOME QUEUES
+    
 
     //Global var to store queues object
     let queues = undefined;
@@ -63,7 +63,7 @@ export default class ReflexPlugin extends FlexPlugin {
       }
     });
 
-
+    //BLOCK TRANSFER TO SOME QUEUES
     Actions.addListener('beforeTransferTask', async (payload, abortFunction) => {
       console.log('beforeTransferTaskPayload: ', payload);
       const targetSid = payload.targetSid;
@@ -75,8 +75,6 @@ export default class ReflexPlugin extends FlexPlugin {
         console.log('targetQueueName: ', targetQueue);
         //Either queue is new (no recent tasks) or name matches a not staffed queue
         if (!targetQueue || targetQueue.queue_name.toLowerCase().includes('not')) {
-          //Replace alert with Flex Notification
-          //alert('No Agents Available.  Transfer canceled.');
           Notifications.showNotification(TRANSFER_BLOCKED);
           abortFunction();
         }
@@ -102,6 +100,28 @@ export default class ReflexPlugin extends FlexPlugin {
     //     playAudio(reservation);
     //   }
     // });
+
+
+    
+    //SET OUTBOUND CALLER ID
+    Actions.addListener('beforeStartOutboundCall', async (payload) => {
+      console.log('BEFORE StartOutboundCall payload:', payload);
+      let outboundQueueSid = payload.queueSid;
+      const queues = await getQueues2();
+      console.debug('queues retrieved:', queues);
+      //queues is map/object with queue objects {queue_name: , queue_sid: }
+      let outboundQueue = Object.values(queues).find(queue => queue.queue_sid === outboundQueueSid);
+      let outboundQueueName = outboundQueue?.queue_name || "Unknown";
+      console.log('outboundQueueName: ', outboundQueueName);
+      //add queue name to payload
+      payload.outboundQueueName = outboundQueueName;
+      //default callerId
+      let newCallerId = '+18044558186';
+      if (outboundQueueName.includes('TN')) { newCallerId= '+16156479890'; }
+      payload.callerId = newCallerId;
+    });
+
+
 
 
     //UTILS?
