@@ -1,10 +1,13 @@
 import React from 'react';
-import { VERSION, Actions, Notifications, NotificationType } from '@twilio/flex-ui';
+import { VERSION, View, Actions, Notifications, NotificationType } from '@twilio/flex-ui';
 
 import { FlexPlugin } from 'flex-plugin';
 
 import CustomTaskListContainer from './components/CustomTaskList/CustomTaskList.Container';
 import reducers, { namespace } from './states';
+
+import VoicemailNavButton from './components/VoicemailNavButtonComponent';
+import VoicemailView from './components/VoicemailViewComponent';
 
 const PLUGIN_NAME = 'ReflexPlugin';
 
@@ -44,7 +47,7 @@ export default class ReflexPlugin extends FlexPlugin {
     });
 
 
-    
+
 
     //Global var to store queues object
     let queues = undefined;
@@ -102,7 +105,7 @@ export default class ReflexPlugin extends FlexPlugin {
     // });
 
 
-    
+
     //SET OUTBOUND CALLER ID
     Actions.addListener('beforeStartOutboundCall', async (payload) => {
       console.log('BEFORE StartOutboundCall payload:', payload);
@@ -117,7 +120,7 @@ export default class ReflexPlugin extends FlexPlugin {
       payload.outboundQueueName = outboundQueueName;
       //default callerId
       let newCallerId = '+18044558186';
-      if (outboundQueueName.includes('TN')) { newCallerId= '+16156479890'; }
+      if (outboundQueueName.includes('TN')) { newCallerId = '+16156479890'; }
       payload.callerId = newCallerId;
     });
 
@@ -147,7 +150,17 @@ export default class ReflexPlugin extends FlexPlugin {
       await task.setAttributes(newAttributes);
     }
 
+    //VoiceMail side nav button and new view
+    flex.SideNav.Content.add(
+      <VoicemailNavButton key="voicemail-sidenav-button" />, { sortOrder: 2 }
+    );
 
+    // Add news view to the ViewCollection
+    flex.ViewCollection.Content.add(
+      <View name="voicemail-view" key="voicemail-view">
+        <VoicemailView key="co-vm-view" />
+      </View>
+    );
 
     //end init
   }
